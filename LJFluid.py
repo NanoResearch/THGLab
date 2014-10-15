@@ -13,15 +13,19 @@ mp = 18/1000.0;  #particle mass in kg/mol
 dt = 1e-6;  #timestep in ns
 nstep = 10000;  #number of simulation steps
 
+#constants
+kb = 1.3806488E-23;
+av = 6.0221413e23;
+
 #for lennard-jones potential - taken from TIP4P-EW paper
 e_lj = .16275*4184; #(J/mol)
 sigma_lj = 3.16435/10;  #nanometers
 sigma_lj12 = sigma_lj**12;
 sigma_lj6 = sigma_lj**6;
 
-xbox = 2.5; #box dimensions in nanometers
-ybox = 2.5;
-zbox = 2.5;
+xbox = 2.2; #box dimensions in nanometers
+ybox = 2.2;
+zbox = 2.2;
 
 x = np.array([0.0]*N_PARTICLES);  #positions in nm
 y = np.array([0.0]*N_PARTICLES);
@@ -98,9 +102,12 @@ for i in range(0,nstep):
     
     if(i%10 == 0):        
         scatter(x,y)
+
+        #calculate temperature
+        T = (mean(vx**2)+mean(vy**2)+mean(vz**2))/3/kb*mp/av;
+        print T
         pause(.01);
         
-    print i
     
     
 
