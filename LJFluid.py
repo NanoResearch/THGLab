@@ -31,9 +31,13 @@ vx = np.array([0.0]*N_PARTICLES);  #velocities in nm / ns
 vy = np.array([0.0]*N_PARTICLES);
 vz = np.array([0.0]*N_PARTICLES);
 
-dudx = np.array([0.0]*N_PARTICLES);
+dudx = np.array([0.0]*N_PARTICLES);  #current force, kcal/nm
 dudy = np.array([0.0]*N_PARTICLES);
 dudz = np.array([0.0]*N_PARTICLES);
+
+dudxb = np.array([0.0]*N_PARTICLES); #previous force
+dudyb = np.array([0.0]*N_PARTICLES);
+dudzb = np.array([0.0]*N_PARTICLES);
 
 T = int(np.round(N_PARTICLES**(1/3.0)));
 for i in range(0,T):
@@ -45,9 +49,9 @@ for i in range(0,T):
             z[index] = float(zbox)/T*(k+1);
 
 for i in range(0,N_PARTICLES):
-    vx[i] = np.random.uniform(-1,1)*0;
-    vy[i] = np.random.uniform(-1,1)*0;
-    vz[i] = np.random.uniform(-1,1)*0;
+    vx[i] = np.random.uniform(-1,1)*30;
+    vy[i] = np.random.uniform(-1,1)*30;
+    vz[i] = np.random.uniform(-1,1)*30;
 
 
 
@@ -55,6 +59,17 @@ scatter(x,y)
 hold(False);
 
 for i in range(0,nstep):
+    #save previous forces
+    dudxb = dudx; 
+    dudyb = dudy;
+    dudzb = dudz;
+    
+    #update positions
+    #x(t+dt) = x(t) + v(t)dt + 1/2 a(t)dt^2
+    x = x + vx*dt + dudx/(2*mp)*dt*dt;
+    y = y + vy*dt + dudy/(2*mp)*dt*dt; 
+    z = z + vz*dt + dudz/(2*mp)*dt*dt;
+    
     
     for p in range(0,N_PARTICLES):
         #compute distance
@@ -70,20 +85,17 @@ for i in range(0,nstep):
                 
         #compute energy derivatives
         R_factor[p] = 0;#No self interaction
-        dudx[p] = np.sum(R_factor * dx);
-        dudy[p] = np.sum(R_factor*dy);
-        dudz[p] = np.sum(R_factor*dz);
+        dudx[p] = np.sum(R_factor*dx)/2;  #divide by 2 since we do i,j then j,i
+        dudy[p] = np.sum(R_factor*dy)/2;
+        dudz[p] = np.sum(R_factor*dz)/2;   
     
-    #update positions / velocities
-    x = x + vx*dt;
-    y = y + vy*dt;
-    z = z + vz*dt;
+    #update velocities
+    #v(t+dt) = v(t) + 1/2 * (a(t) + a(t+dt))dt
+    vx = vx + (dudx + dudxb) / (2*mp)*dt; #J/kg/(nm/ns) = m/s = nm/ns
+    vy = vy + (dudy + dudyb) / (2*mp)*dt;
+    vz = vz + (dudz + dudzb) / (2*mp)*dt;
     
-    #dudx = kcal/nm    
     
-    vx = vx + dudx/mp*dt  #J/kg/(nm/ns) = m/s = nm/ns
-    vy = vy + dudy/mp*dt
-    vz = vz + dudz/mp*dt
     if(i%10 == 0):        
         scatter(x,y)
         pause(.01);
