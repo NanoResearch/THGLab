@@ -85,9 +85,9 @@ for i in range(0,nstep):
                 
         #compute energy derivatives
         R_factor[p] = 0;#No self interaction
-        dudx[p] = np.sum(R_factor*dx)/2;  #divide by 2 since we do i,j then j,i
-        dudy[p] = np.sum(R_factor*dy)/2;
-        dudz[p] = np.sum(R_factor*dz)/2;   
+        dudx[p] = np.sum(R_factor*dx);
+        dudy[p] = np.sum(R_factor*dy);
+        dudz[p] = np.sum(R_factor*dz);   
     
     #update velocities
     #v(t+dt) = v(t) + 1/2 * (a(t) + a(t+dt))dt
