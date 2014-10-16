@@ -35,12 +35,7 @@ c     arrays to hold position, velocity, and energy derivatives
       real*8, allocatable :: vy(:)
       real*8, allocatable :: vz(:)
 
-      real*8, allocatable :: dx(:)
-      real*8, allocatable :: dy(:)
-      real*8, allocatable :: dz(:)
-      real*8, allocatable :: R(:)
-      real*8, allocatable :: R2(:)
-      real*8, allocatable :: R6(:)
+      real*8 dx, dy, dz, R, R2, R6
 
       real*8, allocatable :: derivs(:,:)
       real*8, allocatable :: derivs_old(:,:)
@@ -55,14 +50,6 @@ c     arrays to hold position, velocity, and energy derivatives
       allocate(vx(N_PARTICLES))
       allocate(vy(N_PARTICLES))
       allocate(vz(N_PARTICLES))
-
-      allocate(dx(N_PARTICLES))
-      allocate(dy(N_PARTICLES))
-      allocate(dz(N_PARTICLES))
-
-      allocate(R(N_PARTICLES))
-      allocate(R2(N_PARTICLES))
-      allocate(R6(N_PARTICLES))
 
       allocate(derivs(N_PARTICLES,3))
       allocate(derivs_old(N_PARTICLES,3))
@@ -94,27 +81,31 @@ c        Update Positions
          z = z + vz*dt + derivs(:,3)/(2*mp)*dt*dt
 
          do j = 1, N_PARTICLES
-            dx = x - x(j)
-            dy = y - y(j)
-            dz = z - z(j)
+            do k = j+1, N_PARTICLES
+               dx = x(k) - x(j)
+               dy = y(k) - y(j)
+               dz = z(k) - z(j)
 
-            R = (dx**2 + dy**2 + dz**2)**0.5
+               R = (dx**2 + dy**2 + dz**2)**0.5
 
-            R(j) = 1
-            R2 = R**2
-            R6 = R**6
-
-
-            R = 4*e_lj*(-12*sigma_lj**12/(R6*R2) + 6*sigma_lj**6/R2)/R6
+               R2 = R**2
+               R6 = R**6
 
 
-            R(j) = 0
+               R = 4*e_lj*(-12*sigma_lj**12/(R6*R2)
+     &            + 6*sigma_lj**6/R2)/R6
+
+
 
 c           computer energy derivates and update
 
-            derivs(j,1) = sum(R*dx)
-            derivs(j,2) = sum(R*dy)
-            derivs(j,3) = sum(R*dz)
+               derivs(j,1) = derivs(j,1) + R*dx
+               derivs(k,1) = derivs(k,1) + derivs(j,1)*-1
+               derivs(j,2) = derivs(j,2) + R*dy
+               derivs(k,2) = derivs(k,2) + derivs(j,2)*-1
+               derivs(j,3) = derivs(j,3) + R*dz
+               derivs(k,3) = derivs(k,3) + derivs(j,3)*-1
+            end do
          end do
 
 c        update velocities

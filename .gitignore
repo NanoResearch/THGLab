@@ -29,3 +29,6 @@
 
 #Vim Swap
 *.swp
+
+#Fortran Executable
+*.x

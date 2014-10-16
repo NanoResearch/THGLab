@@ -59,8 +59,8 @@ for i in range(0,N_PARTICLES):
 
 
 
-scatter(x,y)
-hold(False);
+#scatter(x,y)
+#hold(False);
 
 for i in range(0,nstep):
     #save previous forces
@@ -100,13 +100,13 @@ for i in range(0,nstep):
     vz = vz + (dudz + dudzb) / (2*mp)*dt;
     
     
-    if(i%10 == 0):        
-        scatter(x,y)
+    if(i%100 == 0):        
+        #scatter(x,y)
 
         #calculate temperature
-        T = (mean(vx**2)+mean(vy**2)+mean(vz**2))/3/kb*mp/av;
-        print T
-        pause(.01);
+        T = (np.mean(vx**2)+np.mean(vy**2)+np.mean(vz**2))/3/kb*mp/av;
+        print i, T
+        #pause(.01);
         
     
     
